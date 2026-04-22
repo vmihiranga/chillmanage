@@ -36,7 +36,7 @@ export default function DayEventsDrawer({
   ];
 
   const isToday = (() => {
-    const today = new Date();
+    const today = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Colombo' }));
     return (
       date.getDate() === today.getDate() &&
       date.getMonth() === today.getMonth() &&

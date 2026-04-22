@@ -13,7 +13,7 @@ const MONTH_NAMES = [
 ];
 
 export default function CalendarPage() {
-  const now = new Date();
+  const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Colombo' }));
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth());
   const [events, setEvents] = useState<Event[]>([]);
@@ -161,9 +161,10 @@ export default function CalendarPage() {
   };
 
   const goToday = () => {
-    setYear(now.getFullYear());
-    setMonth(now.getMonth());
-    setSelectedDate(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
+    const colomboNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Colombo' }));
+    setYear(colomboNow.getFullYear());
+    setMonth(colomboNow.getMonth());
+    setSelectedDate(new Date(colomboNow.getFullYear(), colomboNow.getMonth(), colomboNow.getDate()));
   };
 
   const handleDayClick = (date: Date) => {

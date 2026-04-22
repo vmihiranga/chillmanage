@@ -41,7 +41,8 @@ export default function CalendarGrid({
   onDayClick,
   zoom = 1,
 }: CalendarGridProps) {
-  const today = new Date();
+  // Get today's date in Asia/Colombo
+  const today = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Colombo' }));
   const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const eventsByDay = getEventsByDay(events, year, month);
