@@ -21,6 +21,9 @@ export default function CalendarPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [zoom, setZoom] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [notifiedEvents, setNotifiedEvents] = useState<Set<string>>(new Set());
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallBtn, setShowInstallBtn] = useState(false);
 
@@ -69,10 +72,47 @@ export default function CalendarPage() {
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    // Notifications Check Loop
+    const interval = setInterval(() => {
+      if (typeof window !== 'undefined' && Notification.permission === 'granted') {
+        const nowMs = Date.now();
+        events.forEach((ev) => {
+          const evTime = new Date(ev.date).getTime();
+          const diffMin = (evTime - nowMs) / (1000 * 60);
+          
+          // Notify if event starts in 10 minutes and hasn't been notified yet
+          if (diffMin > 0 && diffMin <= 10 && !notifiedEvents.has(ev.id)) {
+            new Notification(`Upcoming Event: ${ev.title}`, {
+              body: `Starting in ${Math.round(diffMin)} minutes`,
+              icon: '/icon-512x512.png',
+            });
+            setNotifiedEvents((prev) => new Set([...Array.from(prev), ev.id]));
+          }
+        });
+      }
+    }, 30000); // Check every 30s
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      clearInterval(interval);
     };
-  }, [checkAdminStatus, fetchEvents]);
+  }, [checkAdminStatus, fetchEvents, events, notifiedEvents]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && Notification.permission === 'granted') {
+      setNotificationsEnabled(true);
+    }
+  }, []);
+
+  const requestNotificationPermission = async () => {
+    if (typeof window === 'undefined') return;
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      setNotificationsEnabled(true);
+      new Notification('Chill Calendar', { body: 'Notifications enabled!' });
+    }
+  };
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
@@ -115,8 +155,14 @@ export default function CalendarPage() {
     setSelectedDate(date);
   };
 
+  const filteredEvents = events.filter((ev) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return ev.title.toLowerCase().includes(q) || ev.description?.toLowerCase().includes(q);
+  });
+
   const selectedEvents = selectedDate
-    ? events.filter((ev) => {
+    ? filteredEvents.filter((ev) => {
         const d = new Date(ev.date);
         return (
           d.getFullYear() === selectedDate.getFullYear() &&
@@ -168,6 +214,32 @@ export default function CalendarPage() {
           </span>
         </div>
 
+        {/* Search Bar */}
+        <div className="flex-1 max-w-xs mx-4 hidden md:block">
+          <div className="relative group">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-orange-500 transition-colors" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input
+              type="text"
+              placeholder="Search events..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50 border border-gray-100 rounded-xl focus:bg-white focus:ring-4 focus:ring-orange-50 focus:border-orange-500 outline-none transition-all placeholder:text-gray-300"
+            />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-300 hover:text-gray-500"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                  <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+
         <div className="flex items-center gap-1">
           <button className="p-1.5 transition-colors border border-gray-100 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-orange-500" onClick={prevMonth}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -196,7 +268,18 @@ export default function CalendarPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            {showInstallBtn && (
+          {/* Notification Toggle */}
+          <button
+            onClick={requestNotificationPermission}
+            className={`p-1.5 rounded-xl border transition-all ${notificationsEnabled ? 'bg-orange-500 text-white border-orange-600' : 'bg-gray-50 text-gray-400 border-gray-100 hover:text-orange-500'}`}
+            title={notificationsEnabled ? 'Notifications Active' : 'Enable Notifications'}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
+            </svg>
+          </button>
+
+          {showInstallBtn && (
               <button onClick={handleInstallClick} className="flex items-center justify-center w-9 h-9 text-orange-600 bg-orange-100 border border-orange-200 rounded-xl hover:bg-orange-200 transition-all active:scale-95 shadow-sm animate-bounce-subtle" title="Install App">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
               </button>
@@ -230,16 +313,18 @@ export default function CalendarPage() {
       <main className="flex flex-col flex-1 mx-4 my-4 overflow-hidden bg-white border border-gray-200 shadow-sm rounded-2xl sm:mx-6 sm:my-6">
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50/50">
           <div className="flex items-center gap-2">
-             <span className="text-xs font-bold tracking-wider text-gray-500 uppercase">{events.length} event{events.length !== 1 ? 's' : ''} scheduled</span>
+             <span className="text-xs font-bold tracking-wider text-gray-500 uppercase">
+              {searchQuery ? `${filteredEvents.length} matches found` : `${events.length} event${events.length !== 1 ? 's' : ''} scheduled`}
+            </span>
             {isAdmin && <span className="px-2 py-0.5 text-[9px] font-black bg-orange-500 text-white rounded-full uppercase tracking-tighter">Admin Mode</span>}
           </div>
           <div className="flex items-center gap-1.5">
-            {events.slice(0, 5).map((ev) => (
+            {filteredEvents.slice(0, 5).map((ev) => (
               <div key={ev.id} className="w-2 h-2 rounded-full" style={{ background: ev.color }} />
             ))}
           </div>
         </div>
-        <CalendarGrid year={year} month={month} events={events} selectedDate={selectedDate} onDayClick={handleDayClick} zoom={zoom} />
+        <CalendarGrid year={year} month={month} events={filteredEvents} selectedDate={selectedDate} onDayClick={handleDayClick} zoom={zoom} />
       </main>
 
       {selectedDate && <DayEventsDrawer date={selectedDate} events={selectedEvents} onClose={() => setSelectedDate(null)} onAddEvent={() => openCreateModal(selectedDate)} onEditEvent={openEditModal} isAdmin={isAdmin} />}
