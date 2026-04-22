@@ -225,8 +225,8 @@ export default function CalendarPage() {
               <path d="M16 2v4M8 2v4M3 10h18"/>
             </svg>
           </div>
-          <span className="text-base font-black tracking-tight text-gray-900">
-            Chill <span className="text-orange-500">Cal</span><span className="hidden sm:inline">endar</span>
+          <span className="text-base font-black tracking-tight text-gray-900 hidden sm:inline">
+            Chill <span className="text-orange-500">Calendar</span>
           </span>
         </div>
 
