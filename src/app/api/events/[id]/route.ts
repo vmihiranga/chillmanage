@@ -4,11 +4,14 @@ import { isAdmin } from '@/lib/auth';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!(await isAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+  
+  const { id } = await params;
+
   try {
     const body = await request.json();
     const { title, description, date, color } = body;
@@ -18,7 +21,7 @@ export async function PUT(
     }
 
     const event = await prisma.event.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         title: title.trim(),
         description: description?.trim() || null,
@@ -36,13 +39,16 @@ export async function PUT(
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!(await isAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  const { id } = await params;
+
   try {
-    await prisma.event.delete({ where: { id: params.id } });
+    await prisma.event.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('DELETE /api/events/[id] error:', error);
