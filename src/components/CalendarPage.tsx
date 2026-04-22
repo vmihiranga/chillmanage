@@ -218,14 +218,14 @@ export default function CalendarPage() {
     <div className="flex flex-col min-h-screen bg-gray-50 max-w-[100vw] overflow-x-hidden">
       {/* ── Top Nav ── */}
       <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 py-2 bg-white border-b border-gray-100 sm:px-6">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 shadow-md shadow-orange-200">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-              <rect x="3" y="4" width="18" height="18" rx="2"/>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <div className="flex items-center justify-center w-6 h-6 text-white bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow-sm">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
               <path d="M16 2v4M8 2v4M3 10h18"/>
             </svg>
           </div>
-          <span className="text-base font-black tracking-tight text-gray-900 hidden sm:inline">
+          <span className="text-[13px] font-black tracking-tight text-gray-900 hidden sm:inline">
             Chill <span className="text-orange-500">Calendar</span>
           </span>
         </div>
@@ -246,64 +246,65 @@ export default function CalendarPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-1 sm:gap-2">
-          <button className="p-1.5 transition-colors border border-gray-100 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-orange-500" onClick={prevMonth}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <div className="flex items-center gap-0.5 sm:gap-1">
+          <button className="p-1 transition-colors border border-gray-50 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-orange-500" onClick={prevMonth}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M15 18l-6-6 6-6"/>
             </svg>
           </button>
-          <span className="text-sm font-black text-gray-800 min-w-[120px] text-center">
+          <div className="px-2 text-xs font-black text-gray-700 min-w-[100px] text-center">
             {MONTH_NAMES[month]} {year}
-          </span>
-          <button className="p-1.5 transition-colors border border-gray-100 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-orange-500" onClick={nextMonth}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          </div>
+          <button className="p-1 transition-colors border border-gray-50 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-orange-500" onClick={nextMonth}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M9 18l6-6-6-6"/>
             </svg>
           </button>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 p-1.5 bg-gray-50 border border-gray-100 rounded-xl mr-2">
-            <button onClick={() => setZoom(z => Math.max(0.6, z - 0.2))} className="p-1 text-gray-400 hover:text-orange-500 hover:bg-white rounded-lg transition-all active:scale-90" title="Zoom Out">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14"/></svg>
+        <div className="flex items-center gap-1.5">
+          {/* Zoom controls */}
+          <div className="hidden items-center gap-1 px-1.5 py-0.5 bg-gray-50 rounded-lg border border-gray-100 md:flex">
+            <button onClick={() => setZoom(Math.max(0.6, zoom - 0.1))} className="p-0.5 text-gray-400 hover:text-orange-500 transition-colors">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14"/></svg>
             </button>
-            <span className="text-[9px] font-black w-7 text-center text-gray-400">{Math.round(zoom * 100)}%</span>
-            <button onClick={() => setZoom(z => Math.min(1.6, z + 0.2))} className="p-1 text-gray-400 hover:text-orange-500 hover:bg-white rounded-lg transition-all active:scale-90" title="Zoom In">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M5 12h14"/></svg>
+            <span className="text-[10px] font-black text-gray-400 min-w-[35px] text-center">{Math.round(zoom * 100)}%</span>
+            <button onClick={() => setZoom(Math.min(1.6, zoom + 0.1))} className="p-0.5 text-gray-400 hover:text-orange-500 transition-colors">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M5 12h14"/></svg>
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
           {/* Notification Toggle */}
           <button
             onClick={requestNotificationPermission}
-            className={`p-1.5 rounded-xl border transition-all ${notificationsEnabled ? 'bg-orange-500 text-white border-orange-600' : 'bg-gray-50 text-gray-400 border-gray-100 hover:text-orange-500'}`}
+            className={`p-1 rounded-lg border transition-all ${notificationsEnabled ? 'bg-orange-500 text-white border-orange-600' : 'bg-gray-50 text-gray-400 border-gray-100 hover:text-orange-500'}`}
             title={notificationsEnabled ? 'Notifications Active' : 'Enable Notifications'}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
             </svg>
           </button>
 
           {showInstallBtn && (
-              <button onClick={handleInstallClick} className="flex items-center justify-center w-9 h-9 text-orange-600 bg-orange-100 border border-orange-200 rounded-xl hover:bg-orange-200 transition-all active:scale-95 shadow-sm animate-bounce-subtle" title="Install App">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              <button onClick={handleInstallClick} className="flex items-center justify-center w-7 h-7 text-orange-600 bg-orange-100 border border-orange-200 rounded-lg hover:bg-orange-200 transition-all active:scale-95 shadow-sm animate-bounce-subtle" title="Install App">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
               </button>
             )}
             {isAdmin ? (
               <>
-                <button className="hidden px-3 py-1.5 text-xs font-bold text-gray-600 transition-colors border border-gray-100 rounded-lg lg:inline-flex hover:bg-gray-50" onClick={goToday}>Today</button>
-                <button className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-black text-white transition-all bg-orange-500 rounded-lg hover:bg-orange-600 shadow-lg shadow-orange-100" onClick={() => openCreateModal()}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M5 12h14"/></svg>
+                <button className="hidden px-2 py-1 text-[10px] font-bold text-gray-600 transition-colors border border-gray-100 rounded-lg lg:inline-flex hover:bg-gray-50" onClick={goToday}>Today</button>
+                <button className="hidden sm:flex items-center gap-1 px-2 py-1 text-[10px] font-black text-white transition-all bg-orange-500 rounded-lg hover:bg-orange-600 shadow-lg shadow-orange-100" onClick={() => openCreateModal()}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M5 12h14"/></svg>
                   <span>Event</span>
                 </button>
-                <button onClick={handleLogout} className="p-1.5 text-gray-400 hover:text-orange-500 transition-colors" title="Logout Admin">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 12H9M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5"/></svg>
+                <button onClick={handleLogout} className="p-1 text-gray-400 hover:text-orange-500 transition-colors" title="Logout Admin">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 12H9M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5"/></svg>
                 </button>
               </>
             ) : (
-              <button onClick={() => setShowLogin(true)} className="flex items-center justify-center w-9 h-9 text-orange-600 bg-orange-50 border border-orange-100 rounded-xl hover:bg-orange-100 transition-all active:scale-95 shadow-sm" title="Admin Login">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <button onClick={() => setShowLogin(true)} className="p-1 text-gray-300 hover:text-orange-500 transition-colors" title="Admin Login">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               </button>
             )}
           </div>
