@@ -8,6 +8,7 @@ interface DayEventsDrawerProps {
   onClose: () => void;
   onAddEvent: () => void;
   onEditEvent: (event: Event) => void;
+  isAdmin: boolean;
 }
 
 function formatTime(isoString: string) {
@@ -21,6 +22,7 @@ export default function DayEventsDrawer({
   onClose,
   onAddEvent,
   onEditEvent,
+  isAdmin,
 }: DayEventsDrawerProps) {
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const monthNames = [
@@ -39,25 +41,21 @@ export default function DayEventsDrawer({
 
   return (
     <div className="fixed inset-0 z-40 flex items-end justify-end pointer-events-none sm:items-stretch">
-      {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/30 backdrop-blur-sm pointer-events-auto animate-fade-in"
         onClick={onClose}
       />
 
-      {/* Drawer panel */}
       <div
         className={`
           relative w-full sm:max-w-md h-[85vh] sm:h-screen bg-white shadow-2xl border-t sm:border-t-0 sm:border-l border-gray-200
           flex flex-col pointer-events-auto animate-[slideInRight_0.4s_cubic-bezier(0.34,1.56,0.64,1)] rounded-t-3xl sm:rounded-none
         `}
       >
-        {/* Mobile Handle */}
         <div className="flex justify-center pt-3 pb-1 sm:hidden">
           <div className="w-12 h-1.5 bg-gray-200 rounded-full" />
         </div>
 
-        {/* Header */}
         <div className="sticky top-0 z-10 px-6 py-6 border-b border-gray-100 bg-white/80 backdrop-blur-md">
           <div className="flex items-start justify-between">
             <div>
@@ -89,7 +87,6 @@ export default function DayEventsDrawer({
           </div>
         </div>
 
-        {/* Event list */}
         <div className="flex-1 px-6 py-6 space-y-4 overflow-y-auto bg-gray-50/50">
           {events.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -106,8 +103,9 @@ export default function DayEventsDrawer({
             events.map((ev) => (
               <button
                 key={ev.id}
-                onClick={() => onEditEvent(ev)}
-                className="group w-full flex items-stretch gap-4 p-4 transition-all bg-white border border-gray-100 rounded-2xl text-left hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-0.5 active:scale-[0.98]"
+                onClick={() => isAdmin && onEditEvent(ev)}
+                disabled={!isAdmin}
+                className={`group w-full flex items-stretch gap-4 p-4 transition-all bg-white border border-gray-100 rounded-2xl text-left ${isAdmin ? 'hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-0.5 active:scale-[0.98]' : 'cursor-default'}`}
               >
                 <div
                   className="w-1.5 rounded-full transition-all group-hover:scale-x-150"
@@ -129,31 +127,34 @@ export default function DayEventsDrawer({
                     </p>
                   )}
                 </div>
-                <div className="flex items-center pr-1 transition-opacity opacity-0 group-hover:opacity-100">
-                  <div className="p-1.5 bg-orange-50 text-orange-500 rounded-lg">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                      <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                    </svg>
+                {isAdmin && (
+                  <div className="flex items-center pr-1 transition-opacity opacity-0 group-hover:opacity-100">
+                    <div className="p-1.5 bg-orange-50 text-orange-500 rounded-lg">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </div>
                   </div>
-                </div>
+                )}
               </button>
             ))
           )}
         </div>
 
-        {/* Add event button */}
-        <div className="p-6 border-t border-gray-100 bg-white">
-          <button
-            className="flex items-center justify-center w-full gap-2 py-4 text-sm font-bold text-white transition-all bg-orange-500 rounded-xl hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-200 active:scale-95"
-            onClick={onAddEvent}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-              <path d="M12 5v14M5 12h14"/>
-            </svg>
-            Schedule New Event
-          </button>
-        </div>
+        {isAdmin && (
+          <div className="p-6 border-t border-gray-100 bg-white">
+            <button
+              className="flex items-center justify-center w-full gap-2 py-4 text-sm font-bold text-white transition-all bg-orange-500 rounded-xl hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-200 active:scale-95"
+              onClick={onAddEvent}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+              Schedule New Event
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

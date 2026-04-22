@@ -5,6 +5,7 @@ import { Event } from '@/lib/types';
 import CalendarGrid from '@/components/CalendarGrid';
 import DayEventsDrawer from '@/components/DayEventsDrawer';
 import EventModal from '@/components/EventModal';
+import LoginModal from '@/components/LoginModal';
 
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -14,9 +15,11 @@ const MONTH_NAMES = [
 export default function CalendarPage() {
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
-  const [month, setMonth] = useState(now.getMonth()); // 0-indexed
+  const [month, setMonth] = useState(now.getMonth());
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
 
   // Drawer (day events sidebar)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -28,6 +31,16 @@ export default function CalendarPage() {
     event?: Event;
     initialDate?: string;
   }>({ open: false, mode: 'create' });
+
+  const checkAdminStatus = useCallback(async () => {
+    try {
+      const res = await fetch('/api/auth');
+      const data = await res.json();
+      setIsAdmin(data.isAdmin);
+    } catch {
+      setIsAdmin(false);
+    }
+  }, []);
 
   const fetchEvents = useCallback(async () => {
     setLoading(true);
@@ -45,8 +58,18 @@ export default function CalendarPage() {
   }, [year, month]);
 
   useEffect(() => {
+    checkAdminStatus();
     fetchEvents();
-  }, [fetchEvents]);
+  }, [checkAdminStatus, fetchEvents]);
+
+  const handleLogout = async () => {
+    await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'logout' }),
+    });
+    setIsAdmin(false);
+  };
 
   const prevMonth = () => {
     if (month === 0) { setYear((y) => y - 1); setMonth(11); }
@@ -82,12 +105,14 @@ export default function CalendarPage() {
     : [];
 
   const openCreateModal = (date?: Date) => {
+    if (!isAdmin) return;
     const d = date || selectedDate || new Date();
     const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     setModal({ open: true, mode: 'create', initialDate: iso });
   };
 
   const openEditModal = (event: Event) => {
+    if (!isAdmin) return;
     setModal({ open: true, mode: 'edit', event });
   };
 
@@ -117,7 +142,7 @@ export default function CalendarPage() {
               <path d="M16 2v4M8 2v4M3 10h18"/>
             </svg>
           </div>
-          <span className="text-lg font-extrabold tracking-tight text-gray-900">
+          <span className="text-lg font-extrabold tracking-tight text-gray-900 hidden sm:inline">
             ChillRide <span className="text-orange-500">Manage</span>
           </span>
         </div>
@@ -141,16 +166,34 @@ export default function CalendarPage() {
 
         {/* Actions */}
         <div className="flex items-center gap-2 calendar-header-actions">
-          <button className="hidden px-4 py-2 text-sm font-semibold text-gray-600 transition-colors border border-gray-200 rounded-lg sm:inline-flex hover:bg-gray-50" onClick={goToday}>
-            Today
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-white transition-all bg-orange-500 rounded-lg hover:bg-orange-600 hover:scale-[1.02] active:scale-95 shadow-lg shadow-orange-100" onClick={() => openCreateModal()}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-              <path d="M12 5v14M5 12h14"/>
-            </svg>
-            <span className="hidden sm:inline">Add Event</span>
-            <span className="sm:hidden">Add</span>
-          </button>
+          {isAdmin ? (
+            <>
+              <button className="hidden px-4 py-2 text-sm font-semibold text-gray-600 transition-colors border border-gray-200 rounded-lg lg:inline-flex hover:bg-gray-50" onClick={goToday}>
+                Today
+              </button>
+              <button className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-white transition-all bg-orange-500 rounded-lg hover:bg-orange-600 shadow-lg shadow-orange-100" onClick={() => openCreateModal()}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+                <span className="hidden md:inline">Add Event</span>
+              </button>
+              <button onClick={handleLogout} className="p-2 text-gray-400 hover:text-orange-500 transition-colors" title="Logout Admin">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+                </svg>
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setShowLogin(true)}
+              className="flex items-center gap-2 px-5 py-2 text-sm font-bold text-orange-600 border-2 border-orange-100 rounded-xl hover:bg-orange-50 transition-all active:scale-95"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+              </svg>
+              Admin Login
+            </button>
+          )}
         </div>
       </header>
 
@@ -163,16 +206,21 @@ export default function CalendarPage() {
 
       {/* ── Calendar body ── */}
       <main className="flex flex-col flex-1 mx-4 my-4 overflow-hidden bg-white border border-gray-200 shadow-sm calendar-main rounded-2xl sm:mx-6 sm:my-6">
-        {/* Subheader */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50/50">
-          <span className="text-xs font-bold tracking-wider text-gray-500 uppercase">
-            {events.length} event{events.length !== 1 ? 's' : ''} scheduled
-          </span>
+          <div className="flex items-center gap-2">
+             <span className="text-xs font-bold tracking-wider text-gray-500 uppercase">
+              {events.length} event{events.length !== 1 ? 's' : ''} scheduled
+            </span>
+            {isAdmin && (
+              <span className="px-2 py-0.5 text-[9px] font-black bg-orange-500 text-white rounded-full uppercase tracking-tighter">
+                Admin Mode
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-1.5">
             {events.slice(0, 5).map((ev) => (
               <div key={ev.id} className="w-2 h-2 rounded-full" style={{ background: ev.color }} />
             ))}
-            {events.length > 5 && <span className="text-[10px] font-bold text-gray-400">+{events.length - 5}</span>}
           </div>
         </div>
 
@@ -193,11 +241,12 @@ export default function CalendarPage() {
           onClose={() => setSelectedDate(null)}
           onAddEvent={() => openCreateModal(selectedDate)}
           onEditEvent={openEditModal}
+          isAdmin={isAdmin}
         />
       )}
 
       {/* ── Create / Edit modal ── */}
-      {modal.open && (
+      {modal.open && isAdmin && (
         <EventModal
           mode={modal.mode}
           event={modal.event}
@@ -205,6 +254,17 @@ export default function CalendarPage() {
           onClose={() => setModal({ open: false, mode: 'create' })}
           onSave={handleSave}
           onDelete={handleDelete}
+        />
+      )}
+
+      {/* ── Login Modal ── */}
+      {showLogin && (
+        <LoginModal
+          onClose={() => setShowLogin(false)}
+          onSuccess={() => {
+            setIsAdmin(true);
+            setShowLogin(false);
+          }}
         />
       )}
     </div>
