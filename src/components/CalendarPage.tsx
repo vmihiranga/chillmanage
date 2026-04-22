@@ -23,7 +23,7 @@ export default function CalendarPage() {
   const [zoom, setZoom] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [notifiedEvents, setNotifiedEvents] = useState<Set<string>>(new Set());
+  const [sentReminders, setSentReminders] = useState<Record<string, string[]>>({});
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstallBtn, setShowInstallBtn] = useState(false);
 
@@ -75,20 +75,35 @@ export default function CalendarPage() {
 
     // Notifications Check Loop
     const interval = setInterval(() => {
-      if (typeof window !== 'undefined' && Notification.permission === 'granted') {
+      if (typeof window !== 'undefined' && Notification.permission === 'granted' && events.length > 0) {
         const nowMs = Date.now();
+        
         events.forEach((ev) => {
           const evTime = new Date(ev.date).getTime();
           const diffMin = (evTime - nowMs) / (1000 * 60);
           
-          // Notify if event starts in 10 minutes and hasn't been notified yet
-          if (diffMin > 0 && diffMin <= 10 && !notifiedEvents.has(ev.id)) {
-            new Notification(`Upcoming Event: ${ev.title}`, {
-              body: `Starting in ${Math.round(diffMin)} minutes`,
-              icon: '/icon-512x512.png',
-            });
-            setNotifiedEvents((prev) => new Set([...Array.from(prev), ev.id]));
-          }
+          const levels = [
+            { id: '1d', threshold: 1440, msg: '1 day' },
+            { id: '4h', threshold: 240, msg: '4 hours' },
+            { id: '30m', threshold: 30, msg: '30 minutes' },
+          ];
+
+          levels.forEach((lvl) => {
+            // If we are within the threshold window (up to 5 mins past it) and haven't notified for this level yet
+            if (diffMin > 0 && diffMin <= lvl.threshold && diffMin > lvl.threshold - 10) {
+              const alreadySent = sentReminders[ev.id] || [];
+              if (!alreadySent.includes(lvl.id)) {
+                new Notification(`Reminder: ${ev.title}`, {
+                  body: `Starting in ${lvl.msg}`,
+                  icon: '/icon-512x512.png',
+                });
+                setSentReminders(prev => ({
+                  ...prev,
+                  [ev.id]: [...(prev[ev.id] || []), lvl.id]
+                }));
+              }
+            }
+          });
         });
       }
     }, 30000); // Check every 30s
@@ -97,7 +112,7 @@ export default function CalendarPage() {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       clearInterval(interval);
     };
-  }, [checkAdminStatus, fetchEvents, events, notifiedEvents]);
+  }, [checkAdminStatus, fetchEvents, events, sentReminders]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && Notification.permission === 'granted') {
