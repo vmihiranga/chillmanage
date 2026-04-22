@@ -54,7 +54,8 @@ export default function DayEventsDrawer({
       <div
         className={`
           relative w-full sm:max-w-md h-[85vh] sm:h-screen bg-white shadow-2xl border-t sm:border-t-0 sm:border-l border-gray-200
-          flex flex-col pointer-events-auto animate-[slideInRight_0.4s_cubic-bezier(0.34,1.56,0.64,1)] rounded-t-3xl sm:rounded-none
+          flex flex-col pointer-events-auto rounded-t-3xl sm:rounded-none
+          animate-slide-up-mobile sm:animate-[slideInRight_0.4s_cubic-bezier(0.34,1.56,0.64,1)]
         `}
       >
         <div className="flex justify-center pt-3 pb-1 sm:hidden">

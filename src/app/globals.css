@@ -230,3 +230,14 @@ body {
   animation: bounce-subtle 3s infinite ease-in-out;
 }
 
+/* Mobile slide up animation */
+@keyframes slideUpMobile {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.animate-slide-up-mobile {
+  animation: slideUpMobile 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+

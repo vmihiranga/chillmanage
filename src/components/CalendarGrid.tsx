@@ -114,16 +114,16 @@ export default function CalendarGrid({
               <div className="flex items-start justify-between w-full">
                 <span
                   className={`
-                    flex items-center justify-center rounded-full font-bold
+                    flex items-center justify-center rounded-full font-black
                     transition-transform group-hover:scale-110
                     ${isToday ? 'bg-orange-500 text-white shadow-lg shadow-orange-200' : ''}
                     ${!isToday && isSelected ? 'text-orange-600' : ''}
                     ${!isToday && !isSelected ? (isPast ? 'text-gray-300' : 'text-gray-600') : ''}
                   `}
                   style={{ 
-                    width: `${30 * Math.max(0.8, zoom)}px`, 
-                    height: `${30 * Math.max(0.8, zoom)}px`,
-                    fontSize: `${13 * zoom}px` 
+                    width: `${28 * Math.max(0.8, zoom)}px`, 
+                    height: `${28 * Math.max(0.8, zoom)}px`,
+                    fontSize: `${12 * zoom}px` 
                   }}
                 >
                   {day}
