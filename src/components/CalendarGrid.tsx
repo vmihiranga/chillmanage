@@ -76,7 +76,7 @@ export default function CalendarGrid({
       </div>
 
       {/* Day cells */}
-      <div className="grid grid-cols-7 flex-1 min-w-[300px]">
+      <div className="grid grid-cols-7 flex-1 w-full relative">
         {cells.map((day, idx) => {
           if (day === null) {
             return (

@@ -215,7 +215,7 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-gray-50 max-w-[100vw] overflow-x-hidden">
       {/* ── Top Nav ── */}
       <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 py-2 bg-white border-b border-gray-100 sm:px-6">
         <div className="flex items-center gap-2">
@@ -316,7 +316,7 @@ export default function CalendarPage() {
         </div>
       )}
 
-      <main className="flex flex-col flex-1 mx-4 my-4 overflow-hidden bg-white border border-gray-200 shadow-sm rounded-2xl sm:mx-6 sm:my-6">
+      <main className="flex flex-col flex-1 mx-2 my-2 sm:mx-6 sm:my-6 overflow-hidden bg-white border border-gray-200 shadow-sm rounded-2xl">
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50/50">
           <div className="flex items-center gap-2">
              <span className="text-xs font-bold tracking-wider text-gray-500 uppercase">
