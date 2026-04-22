@@ -13,7 +13,12 @@ interface DayEventsDrawerProps {
 
 function formatTime(isoString: string) {
   const d = new Date(isoString);
-  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  return d.toLocaleTimeString('en-US', { 
+    hour: 'numeric', 
+    minute: '2-digit', 
+    hour12: true,
+    timeZone: 'Asia/Colombo' 
+  });
 }
 
 export default function DayEventsDrawer({
