@@ -1,6 +1,6 @@
-# ChillRide Management — Deployment Guide (chillmanage)
+# Chill Calendar — Deployment Guide
 
-This guide explains how to deploy the **ChillRide Management** app to Vercel with a managed Postgres database.
+This guide explains how to deploy the **Chill Calendar** app to Vercel with a managed Postgres database.
 
 ## 1. Prepare for Deployment
 Ensure your code is pushed to a GitHub repository.
@@ -38,7 +38,6 @@ Since we are using Prisma, you need to push your schema to the live database:
 ---
 ### Tech Stack
 - **Frontend**: Next.js 15 (App Router)
-- **Styling**: Tailwind CSS (Dark Mode)
-- **Database**: Vercel Postgres (Neon)
+- **Styling**: Tailwind CSS (Light Theme)
+- **Database**: Vercel Postgres / Supabase
 - **ORM**: Prisma
-- **Icons**: Lucide-inspired SVG

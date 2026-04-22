@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   title: 'Chill Calendar',
   description: 'Your premium event scheduling app',
   manifest: '/manifest.json',
-  keywords: ['calendar', 'events', 'scheduling', 'chillride'],
+  keywords: ['calendar', 'events', 'scheduling', 'chill'],
   openGraph: {
     title: 'Chill Calendar',
     description: 'Schedule and manage your events effortlessly.',
